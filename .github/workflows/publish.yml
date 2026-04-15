@@ -6,12 +6,12 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # Required for OIDC Trusted Publisher
+  id-token: write # Required for OIDC Trusted Publisher
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: npm-publish  # Must match the Environment name set on npmjs.com Trusted Publisher form
+    environment: npm-publish # Must match the Environment name set on npmjs.com Trusted Publisher form
 
     steps:
       - name: Checkout
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
