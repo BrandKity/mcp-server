@@ -32,7 +32,7 @@
   "homepage": "https://brandkity.com/mcp",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brandkity/mcp-server.git"
+    "url": "https://github.com/BrandKity/mcp-server"
   },
   "bugs": {
     "url": "https://brandkity.com/contact"
