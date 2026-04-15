@@ -19,7 +19,7 @@ export class BrandKityClient {
         return {
             Authorization: `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',
-            'User-Agent': 'brandkity-mcp/1.1.0',
+            'User-Agent': 'brandkity-mcp/1.2.0',
         };
     }
     async request(method, path, body) {
@@ -71,7 +71,7 @@ export class BrandKityClient {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${this.apiKey}`,
-                    'User-Agent': 'brandkity-mcp/1.1.0',
+                    'User-Agent': 'brandkity-mcp/1.2.0',
                 },
                 body: formData,
                 signal: controller.signal,
@@ -181,7 +181,7 @@ export class BrandKityClient {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${this.apiKey}`,
-                    'User-Agent': 'brandkity-mcp/1.1.0',
+                    'User-Agent': 'brandkity-mcp/1.2.0',
                 },
                 body: formData,
                 signal: controller.signal,

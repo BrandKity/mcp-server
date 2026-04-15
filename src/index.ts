@@ -60,17 +60,17 @@ const client = new BrandKityClient(API_KEY, API_URL)
 
 const server = new McpServer({
   name: 'brandkity',
-  version: '1.1.0',
+  version: '1.2.0',
 })
 
 // ── Register all tools ─────────────────────────────────────────────────────────
 
-registerWorkspaceTools(server, client)  // get_workspace
-registerFileTools(server, client)       // upload_file, list_files
-registerKitTools(server, client)        // list_kits, create_kit, get_kit, update_kit, publish_kit, unpublish_kit
-registerBlockTools(server, client)      // list_blocks, add_block, update_block, delete_block
-registerContentTools(server, client)    // add_colors, add_typography, set_brand_story, set_block_note
-registerUploadTools(server, client)     // upload_asset, upload_assets_batch, upload_kit_logo, upload_cover_image
+registerWorkspaceTools(server, client) // get_workspace
+registerFileTools(server, client) // upload_file, list_files
+registerKitTools(server, client) // list_kits, create_kit, get_kit, update_kit, publish_kit, unpublish_kit
+registerBlockTools(server, client) // list_blocks, add_block, update_block, delete_block
+registerContentTools(server, client) // add_colors, add_typography, set_brand_story, set_block_note
+registerUploadTools(server, client) // upload_asset, upload_assets_batch, upload_kit_logo, upload_cover_image
 
 // ── Start server ───────────────────────────────────────────────────────────────
 

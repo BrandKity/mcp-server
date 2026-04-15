@@ -82,9 +82,7 @@ export function registerUploadTools(server, client) {
             .describe('Target block type (used for MIME validation and storage path)'),
         files: z
             .array(z.object({
-            file_path: z
-                .string()
-                .describe('Absolute path to the local file'),
+            file_path: z.string().describe('Absolute path to the local file'),
             variant_name: z
                 .string()
                 .optional()
@@ -200,9 +198,7 @@ export function registerUploadTools(server, client) {
         'Uploads the file to workspace storage and then sets logo_url on the kit.',
     ].join(' '), {
         kit_id: z.string().describe('Kit UUID'),
-        file_path: z
-            .string()
-            .describe('Absolute path to the image file (SVG, PNG, JPG, WEBP)'),
+        file_path: z.string().describe('Absolute path to the image file (SVG, PNG, JPG, WEBP)'),
     }, async ({ kit_id, file_path }) => {
         try {
             // Step 1: Upload to workspace storage to get a CDN URL
@@ -243,9 +239,7 @@ export function registerUploadTools(server, client) {
         'Uploads the file to workspace storage and then sets cover_image_url on the kit.',
     ].join(' '), {
         kit_id: z.string().describe('Kit UUID'),
-        file_path: z
-            .string()
-            .describe('Absolute path to the image file'),
+        file_path: z.string().describe('Absolute path to the image file'),
     }, async ({ kit_id, file_path }) => {
         try {
             // Step 1: Upload to workspace storage to get a CDN URL

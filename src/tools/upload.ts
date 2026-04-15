@@ -22,10 +22,7 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error'
 }
 
-export function registerUploadTools(
-  server: McpServer,
-  client: BrandKityClient
-): void {
+export function registerUploadTools(server: McpServer, client: BrandKityClient): void {
   // ── upload_asset ──
   server.tool(
     'upload_asset',
@@ -122,9 +119,7 @@ export function registerUploadTools(
       files: z
         .array(
           z.object({
-            file_path: z
-              .string()
-              .describe('Absolute path to the local file'),
+            file_path: z.string().describe('Absolute path to the local file'),
             variant_name: z
               .string()
               .optional()
@@ -160,7 +155,9 @@ export function registerUploadTools(
       continue_on_error: z
         .boolean()
         .optional()
-        .describe('If true, continues uploading after failures and returns a partial result. Default: true'),
+        .describe(
+          'If true, continues uploading after failures and returns a partial result. Default: true'
+        ),
     },
     async ({ kit_id, block_id, block_type, files, parallelism = 3, continue_on_error = true }) => {
       try {
@@ -192,13 +189,19 @@ export function registerUploadTools(
             const { file, index } = next
 
             try {
-              const uploaded = await client.uploadAsset(kit_id, block_id, file.file_path, block_type, {
-                variant_name: file.variant_name,
-                collateral_title: file.collateral_title,
-                collateral_description: file.collateral_description,
-                resource_label: file.resource_label,
-                resource_category: file.resource_category,
-              })
+              const uploaded = await client.uploadAsset(
+                kit_id,
+                block_id,
+                file.file_path,
+                block_type,
+                {
+                  variant_name: file.variant_name,
+                  collateral_title: file.collateral_title,
+                  collateral_description: file.collateral_description,
+                  resource_label: file.resource_label,
+                  resource_category: file.resource_category,
+                }
+              )
 
               results[index] = {
                 file_path: file.file_path,
@@ -267,9 +270,7 @@ export function registerUploadTools(
     ].join(' '),
     {
       kit_id: z.string().describe('Kit UUID'),
-      file_path: z
-        .string()
-        .describe('Absolute path to the image file (SVG, PNG, JPG, WEBP)'),
+      file_path: z.string().describe('Absolute path to the image file (SVG, PNG, JPG, WEBP)'),
     },
     async ({ kit_id, file_path }) => {
       try {
@@ -321,9 +322,7 @@ export function registerUploadTools(
     ].join(' '),
     {
       kit_id: z.string().describe('Kit UUID'),
-      file_path: z
-        .string()
-        .describe('Absolute path to the image file'),
+      file_path: z.string().describe('Absolute path to the image file'),
     },
     async ({ kit_id, file_path }) => {
       try {

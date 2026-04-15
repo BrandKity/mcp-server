@@ -47,7 +47,7 @@ if (!API_KEY.startsWith('bk_live_')) {
 const client = new BrandKityClient(API_KEY, API_URL);
 const server = new McpServer({
     name: 'brandkity',
-    version: '1.1.0',
+    version: '1.2.0',
 });
 // ── Register all tools ─────────────────────────────────────────────────────────
 registerWorkspaceTools(server, client); // get_workspace
