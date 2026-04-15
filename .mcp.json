@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "brandkity": {
+      "command": "npx",
+      "args": ["-y", "@brandkity/mcp"],
+      "env": {
+        "BRANDKITY_API_KEY": "YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}
