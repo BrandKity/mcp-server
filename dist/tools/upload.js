@@ -5,6 +5,9 @@
  * upload_kit_logo & upload_cover_image: Upload to workspace storage, then set the URL on the kit.
  */
 import { z } from 'zod';
+function getErrorMessage(error) {
+    return error instanceof Error ? error.message : 'Unknown error';
+}
 export function registerUploadTools(server, client) {
     // ── upload_asset ──
     server.tool('upload_asset', [
@@ -60,6 +63,130 @@ export function registerUploadTools(server, client) {
                     {
                         type: 'text',
                         text: `Error uploading ${file_path}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
+                isError: true,
+            };
+        }
+    });
+    // ── upload_assets_batch ──
+    server.tool('upload_assets_batch', [
+        'Batch upload multiple local files into a single block with one tool call.',
+        'Use this to speed up large imports for logos, visuals, videos, collaterals, resources, and icons.',
+        'Each file can include block-specific metadata (logo variant, collateral title, resource label/category).',
+    ].join(' '), {
+        kit_id: z.string().describe('Kit UUID'),
+        block_id: z.string().describe('Block UUID'),
+        block_type: z
+            .enum(['logos', 'visuals', 'videos', 'collaterals', 'resources', 'icons'])
+            .describe('Target block type (used for MIME validation and storage path)'),
+        files: z
+            .array(z.object({
+            file_path: z
+                .string()
+                .describe('Absolute path to the local file'),
+            variant_name: z
+                .string()
+                .optional()
+                .describe('For logos blocks only — the logo variant slot name'),
+            collateral_title: z
+                .string()
+                .optional()
+                .describe('For collaterals blocks only — the display title'),
+            collateral_description: z
+                .string()
+                .optional()
+                .describe('Optional description for collateral items'),
+            resource_label: z
+                .string()
+                .optional()
+                .describe('For resources blocks only — the display label'),
+            resource_category: z
+                .string()
+                .optional()
+                .describe('For resources blocks only — the display category'),
+        }))
+            .min(1)
+            .max(100)
+            .describe('List of files to upload in a single batch request (max 100 files)'),
+        parallelism: z
+            .number()
+            .int()
+            .min(1)
+            .max(6)
+            .optional()
+            .describe('How many files to upload concurrently. Default: 3 (max: 6)'),
+        continue_on_error: z
+            .boolean()
+            .optional()
+            .describe('If true, continues uploading after failures and returns a partial result. Default: true'),
+    }, async ({ kit_id, block_id, block_type, files, parallelism = 3, continue_on_error = true }) => {
+        try {
+            const totalFiles = files.length;
+            const workerCount = continue_on_error ? parallelism : 1;
+            const queue = files.map((file, index) => ({ file, index }));
+            const results = new Array(totalFiles);
+            let shouldStop = false;
+            const worker = async () => {
+                while (!shouldStop) {
+                    const next = queue.shift();
+                    if (!next)
+                        return;
+                    const { file, index } = next;
+                    try {
+                        const uploaded = await client.uploadAsset(kit_id, block_id, file.file_path, block_type, {
+                            variant_name: file.variant_name,
+                            collateral_title: file.collateral_title,
+                            collateral_description: file.collateral_description,
+                            resource_label: file.resource_label,
+                            resource_category: file.resource_category,
+                        });
+                        results[index] = {
+                            file_path: file.file_path,
+                            success: true,
+                            asset_id: uploaded.asset_id,
+                            public_url: uploaded.public_url,
+                        };
+                    }
+                    catch (error) {
+                        results[index] = {
+                            file_path: file.file_path,
+                            success: false,
+                            error: getErrorMessage(error),
+                        };
+                        if (!continue_on_error) {
+                            shouldStop = true;
+                            return;
+                        }
+                    }
+                }
+            };
+            await Promise.all(Array.from({ length: workerCount }, () => worker()));
+            const completedResults = results.filter((result) => result !== undefined);
+            const successful = completedResults.filter((result) => result.success);
+            const failed = completedResults.filter((result) => !result.success);
+            const payload = {
+                total_files: totalFiles,
+                processed_files: completedResults.length,
+                uploaded_count: successful.length,
+                failed_count: failed.length,
+                skipped_count: totalFiles - completedResults.length,
+                block_type,
+                continue_on_error,
+                parallelism: workerCount,
+                results: completedResults,
+            };
+            return {
+                content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
+                ...(failed.length > 0 ? { isError: true } : {}),
+            };
+        }
+        catch (error) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Batch upload failed: ${getErrorMessage(error)}`,
                     },
                 ],
                 isError: true,
