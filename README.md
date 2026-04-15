@@ -74,7 +74,7 @@ Once configured, ask your AI agent to create a brand kit:
 
 > "Create a brand kit for Acme Corp with the accent color #E55B00. Add a Colors block with the primary palette (Orange Flame #E55B00, Midnight #1A1A2E, Canvas #FAF9F7) and a Typography block with Inter for headings and DM Sans for body. Upload the logos from /Users/me/acme/logos/."
 
-## Available Tools (18)
+## Available Tools (21)
 
 | Tool | Description |
 |------|-------------|
@@ -102,6 +102,7 @@ Once configured, ask your AI agent to create a brand kit:
 | `set_block_note` | Set the editorial note displayed above any block |
 | **Upload** | |
 | `upload_asset` | Upload a local file into a block (logos, visuals, videos, etc.) |
+| `upload_assets_batch` | Upload multiple local files into the same block in one call |
 | `upload_kit_logo` | Upload and set the kit's header logo |
 | `upload_cover_image` | Upload and set the kit's cover image |
 
