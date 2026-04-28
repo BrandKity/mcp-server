@@ -10,7 +10,27 @@ export declare class BrandKityClient {
     constructor(apiKey: string, baseUrl: string);
     /** 30-second timeout prevents AI agents from hanging on slow/unresponsive API. */
     private static readonly REQUEST_TIMEOUT_MS;
+    /**
+     * Calculate a proportional upload timeout based on file size.
+     * Base: 60 s. Adds 20 s per 10 MB. Capped at 10 minutes.
+     */
+    private static uploadTimeout;
+    /**
+     * Upload helper with automatic retry on transient network failures and 5xx errors.
+     * Rebuilds the FormData each attempt (the file is already in memory as a Buffer).
+     * Does NOT retry on 4xx — those indicate bad input and should surface immediately.
+     */
+    private doUpload;
     private get headers();
+    /**
+     * Map common file extensions to MIME types for presigned upload requests.
+     */
+    private static guessContentType;
+    /**
+     * Safely parse JSON from a Response — falls back to plain text for error bodies
+     * (e.g. "Request Entity Too Large" from Vercel's edge when body > 4.5 MB).
+     */
+    private static safeJsonOrText;
     private request;
     getWorkspace(): Promise<{
         name: string;
@@ -23,6 +43,7 @@ export declare class BrandKityClient {
     /**
      * Upload any local file to workspace R2 storage.
      * Returns a public URL immediately usable in other API calls.
+     * Retries up to 3 times on transient network errors. Timeout scales with file size.
      */
     uploadFile(filePath: string, tags?: string): Promise<{
         id: string;
@@ -142,6 +163,9 @@ export declare class BrandKityClient {
      * Upload a local file directly into a block (logo, visual, video, icon, collateral, resource).
      * Use upload_file for workspace-level uploads and typography font files.
      * Use upload_asset for block-embedded assets.
+     *
+     * Files ≥ 4 MB use a presigned R2 URL (3-step: presign → PUT → complete) to bypass
+     * Vercel's ~4.5 MB serverless request body limit. Smaller files use multipart upload.
      *
      * R2 key path: prod/brandkits/{kitId}/{blockType}/{uuid}-{filename}
      */

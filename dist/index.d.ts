@@ -6,11 +6,11 @@
  * brand kit platform. Programmatically create, populate, and publish brand
  * kits from local assets — including fonts, images, videos, and documents.
  *
- * Tools registered (21 total):
+ * Tools registered (22 total):
  *   Workspace:  get_workspace
  *   Files:      upload_file, list_files
  *   Kits:       list_kits, create_kit, get_kit, update_kit, publish_kit, unpublish_kit
- *   Blocks:     list_blocks, add_block, update_block, delete_block
+ *   Blocks:     list_blocks, ensure_block, add_block, update_block, delete_block
  *   Content:    add_colors, add_typography, set_brand_story, set_block_note
  *   Upload:     upload_asset, upload_assets_batch, upload_kit_logo, upload_cover_image
  *

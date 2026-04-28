@@ -107,8 +107,10 @@ export function registerUploadTools(server: McpServer, client: BrandKityClient):
     'upload_assets_batch',
     [
       'Batch upload multiple local files into a single block with one tool call.',
-      'Use this to speed up large imports for logos, visuals, videos, collaterals, resources, and icons.',
-      'Each file can include block-specific metadata (logo variant, collateral title, resource label/category).',
+      'Duplicate file_path values in the list are automatically skipped — each unique path is uploaded only once.',
+      'Use for logos, visuals, videos, collaterals, resources, and icons.',
+      'For files larger than 50 MB, prefer uploading individually with upload_asset.',
+      'If the batch partially fails, resubmit only the failed files.',
     ].join(' '),
     {
       kit_id: z.string().describe('Kit UUID'),
@@ -161,9 +163,20 @@ export function registerUploadTools(server: McpServer, client: BrandKityClient):
     },
     async ({ kit_id, block_id, block_type, files, parallelism = 3, continue_on_error = true }) => {
       try {
-        const totalFiles = files.length
+        // ── Deduplicate by file_path ──────────────────────────────────────────
+        // Agents sometimes pass the same path twice (e.g. when retrying a
+        // partial failure). Each unique path is uploaded exactly once.
+        const seenPaths = new Set<string>()
+        const deduplicatedFiles = files.filter((f) => {
+          if (seenPaths.has(f.file_path)) return false
+          seenPaths.add(f.file_path)
+          return true
+        })
+        const duplicateCount = files.length - deduplicatedFiles.length
+
+        const totalFiles = deduplicatedFiles.length
         const workerCount = continue_on_error ? parallelism : 1
-        const queue = files.map((file, index) => ({ file, index }))
+        const queue = deduplicatedFiles.map((file, index) => ({ file, index }))
         const results: Array<
           | {
               file_path: string
@@ -231,7 +244,8 @@ export function registerUploadTools(server: McpServer, client: BrandKityClient):
         const failed = completedResults.filter((result) => !result.success)
 
         const payload = {
-          total_files: totalFiles,
+          total_requested: files.length,
+          duplicates_skipped: duplicateCount,
           processed_files: completedResults.length,
           uploaded_count: successful.length,
           failed_count: failed.length,

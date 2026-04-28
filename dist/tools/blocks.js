@@ -13,14 +13,94 @@ export function registerBlockTools(server, client) {
         }
         catch (error) {
             return {
-                content: [{ type: 'text', text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}` }],
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
+                isError: true,
+            };
+        }
+    });
+    // ── ensure_block ─────────────────────────────────────────────────────────────
+    server.tool('ensure_block', [
+        'PREFERRED over add_block. Idempotent block creation: if a block of the given type already',
+        'exists in the kit, returns its block_id without creating a duplicate.',
+        'If no matching block exists, creates one and returns the new block_id.',
+        'Use this for every block in your workflow so re-runs and retries never produce extra blocks.',
+        'The "created" field in the response tells you whether a new block was created (true)',
+        'or an existing one was returned (false).',
+    ].join(' '), {
+        kit_id: z.string().describe('Kit UUID'),
+        type: z
+            .enum([
+            'colors',
+            'typography',
+            'logos',
+            'visuals',
+            'videos',
+            'icons',
+            'collaterals',
+            'resources',
+            'rich_text',
+        ])
+            .describe('Block type'),
+        name: z
+            .string()
+            .optional()
+            .describe('Custom display name. Only applied when a new block is created; ignored when an existing block is returned.'),
+    }, async ({ kit_id, type, name }) => {
+        try {
+            const blocks = (await client.listBlocks(kit_id));
+            const existing = blocks.find((b) => b.type === type);
+            if (existing) {
+                // The list endpoint returns full DB rows where the PK is `id`.
+                // Normalise to block_id so callers always use the same field name.
+                const blockId = (existing.id ?? existing.block_id);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify({
+                                block_id: blockId,
+                                type: existing.type,
+                                name: existing.name,
+                                created: false,
+                                note: `Existing ${type} block returned. No new block was created.`,
+                            }, null, 2),
+                        },
+                    ],
+                };
+            }
+            // No existing block of this type — create one.
+            const created = await client.addBlock(kit_id, type, name);
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify({ ...created, created: true }, null, 2),
+                    },
+                ],
+            };
+        }
+        catch (error) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
                 isError: true,
             };
         }
     });
     // ── add_block ────────────────────────────────────────────────────────────────
     server.tool('add_block', [
-        'Add a new content block to a kit. Returns the block_id needed for adding content.',
+        'IMPORTANT: prefer ensure_block over this tool — ensure_block is idempotent and prevents duplicates.',
+        'add_block creates a new block unconditionally. Calling it twice creates two separate blocks of the same type.',
+        'Only use add_block when you have already confirmed via list_blocks that no block of this type exists.',
         'Block types:',
         '• colors — brand palette swatches (use add_colors)',
         '• typography — font entries (use add_typography)',
@@ -57,7 +137,12 @@ export function registerBlockTools(server, client) {
         }
         catch (error) {
             return {
-                content: [{ type: 'text', text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}` }],
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
                 isError: true,
             };
         }
@@ -80,7 +165,12 @@ export function registerBlockTools(server, client) {
         }
         catch (error) {
             return {
-                content: [{ type: 'text', text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}` }],
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
                 isError: true,
             };
         }
@@ -96,7 +186,12 @@ export function registerBlockTools(server, client) {
         }
         catch (error) {
             return {
-                content: [{ type: 'text', text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}` }],
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    },
+                ],
                 isError: true,
             };
         }
