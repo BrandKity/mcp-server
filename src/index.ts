@@ -7,7 +7,7 @@
  * brand kit platform. Programmatically create, populate, and publish brand
  * kits from local assets — including fonts, images, videos, and documents.
  *
- * Tools registered (22 total):
+ * Tools registered (26 total):
  *   Workspace:  get_workspace
  *   Files:      upload_file, list_files
  *   Kits:       list_kits, create_kit, get_kit, update_kit, publish_kit, unpublish_kit
@@ -64,7 +64,7 @@ const client = new BrandKityClient(API_KEY, API_URL)
  * duplicates, retrying incorrectly, or uploading the same files twice.
  */
 const AGENT_INSTRUCTIONS = `
-BRANDKITY MCP — OPERATING RULES (v1.3.0)
+BRANDKITY MCP — OPERATING RULES (v1.4.0)
 Read these rules before calling any tool. They prevent duplicate data,
 failed uploads, and wasted API calls.
 
@@ -93,6 +93,16 @@ FILE UPLOADS
   not in large batches, to avoid batch-level timeout failures.
 - upload_asset and upload_file both auto-retry on transient network errors.
 
+WHITE-LABEL (Pro+ only)
+- To set a custom browser tab favicon: upload_file the favicon image first,
+  then call update_kit with custom_favicon_url set to the returned CDN URL.
+- To set a custom social share image: upload_file the image, then call
+  update_kit with og_image_url set to the returned CDN URL.
+- To set custom meta title/description: call update_kit with og_title and/or
+  og_description. Pass null to reset to the kit's default name/description.
+- These fields require a Pro or Agency plan. A 403 error means the workspace
+  plan does not support white-label features.
+
 SAFE WORKFLOW ORDER (recommended for every new kit)
 1. get_workspace         — verify auth, check plan and storage
 2. list_kits             — find existing kit or confirm name is available
@@ -104,13 +114,14 @@ SAFE WORKFLOW ORDER (recommended for every new kit)
 8. upload_asset / upload_assets_batch  — upload files into file-based blocks
 9. set_block_note        — add editorial notes to each block
 10. upload_kit_logo      — optional: set the kit header logo
-11. publish_kit          — only when the kit is complete
+11. update_kit           — optional: set og_title, og_description, og_image_url, custom_favicon_url (Pro+)
+12. publish_kit          — only when the kit is complete
 `.trim()
 
 const server = new McpServer(
   {
     name: 'brandkity',
-    version: '1.3.0',
+    version: '1.4.0',
   },
   {
     instructions: AGENT_INSTRUCTIONS,

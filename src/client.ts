@@ -326,6 +326,11 @@ export class BrandKityClient {
       tagline?: string | null
       logo_url?: string | null
       cover_image_url?: string | null
+      // White-label fields (Pro+ only)
+      og_title?: string | null
+      og_description?: string | null
+      og_image_url?: string | null
+      custom_favicon_url?: string | null
     }
   ) {
     return this.request<Record<string, unknown>>('PATCH', `/api/v1/kits/${kitId}`, data)

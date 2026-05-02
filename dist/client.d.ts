@@ -106,6 +106,10 @@ export declare class BrandKityClient {
         tagline?: string | null;
         logo_url?: string | null;
         cover_image_url?: string | null;
+        og_title?: string | null;
+        og_description?: string | null;
+        og_image_url?: string | null;
+        custom_favicon_url?: string | null;
     }): Promise<Record<string, unknown>>;
     publishKit(kitId: string): Promise<{
         status: string;

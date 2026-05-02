@@ -2,6 +2,8 @@
 
 Model Context Protocol server for **BrandKity** — create and manage brand kits from any AI agent (Claude Desktop, Cursor, Windsurf, or any MCP-compatible client).
 
+**Current Version**: 1.4.0 — Now with white-label branding support (Pro+)
+
 ## Quick Start
 
 ### 1. Get an API Key
@@ -87,7 +89,7 @@ Once configured, ask your AI agent to create a brand kit:
 | `list_kits` | List all brand kits (filter by draft/published/all) |
 | `create_kit` | Create a new kit → returns kit_id |
 | `get_kit` | Get a kit with all blocks and content |
-| `update_kit` | Update kit settings (name, color, template, logo_url, cover_image_url) |
+| `update_kit` | Update kit settings (name, color, template, logo_url, cover_image_url, **white-label fields**) |
 | `publish_kit` | Publish a kit → returns public URL |
 | `unpublish_kit` | Unpublish a kit (reverts to draft) |
 | **Blocks** | |
@@ -106,6 +108,34 @@ Once configured, ask your AI agent to create a brand kit:
 | `upload_assets_batch` | Upload multiple local files into the same block; deduplicates by file path |
 | `upload_kit_logo` | Upload and set the kit's header logo |
 | `upload_cover_image` | Upload and set the kit's cover image |
+
+## White-Label Branding (Pro+ Feature)
+
+Customize your portal with custom favicon, social share image, and SEO metadata:
+
+```typescript
+// Upload custom assets
+const faviconUrl = await client.uploadFile('favicon.ico', faviconBuffer);
+const ogImageUrl = await client.uploadFile('og-image.png', ogImageBuffer);
+
+// Apply white-label branding
+await client.updateKit('kit-id', {
+  og_title: 'Acme Corp Brand Guidelines',
+  og_description: 'Official brand assets and standards',
+  custom_favicon_url: faviconUrl,
+  og_image_url: ogImageUrl,
+});
+```
+
+**Fields**:
+- `og_title` (string, max 100 chars) — SEO title for social share
+- `og_description` (string, max 300 chars) — SEO description
+- `custom_favicon_url` (string) — CDN URL to favicon (ICO/PNG/SVG)
+- `og_image_url` (string) — CDN URL to social share image (1200×630 px recommended)
+
+**Plan Requirements**:
+- Free/Starter: White-label fields are read-only
+- Pro/Agency: Full read-write access
 
 ## Environment Variables
 
@@ -130,13 +160,15 @@ Once configured, ask your AI agent to create a brand kit:
 11. publish_kit        → make the portal live
 ```
 
-## Reliability Notes (v1.3.0)
+## Reliability Notes (v1.4.0)
 
 - **No duplicate blocks** — `ensure_block` is idempotent. Re-running a workflow never creates duplicate blocks.
 - **Auto-retry on uploads** — `upload_asset` and `upload_file` retry up to 3 times on network errors with exponential backoff.
 - **Size-aware timeouts** — Upload timeout scales with file size (60 s base + 20 s per 10 MB, max 10 min). Large files like 64 MB video assets are handled reliably.
 - **Batch deduplication** — `upload_assets_batch` silently skips duplicate `file_path` entries so the same file is never uploaded twice in one batch.
 - **Agent instructions** — The server now provides operating rules to AI clients at connection time, reducing duplicate operations from AI agents automatically.
+- **White-label URL resolution** — CDN URLs in white-label fields are automatically resolved to asset IDs server-side; agents don't need to manage asset IDs directly.
+- **Storage tracking** — All file uploads are tracked per workspace for accurate quota enforcement.
 
 ## License
 

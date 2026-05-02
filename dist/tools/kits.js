@@ -87,7 +87,7 @@ export function registerKitTools(server, client) {
         }
     });
     // ── update_kit ──
-    server.tool('update_kit', "Update a kit's top-level settings like name, accent color, template, tagline, logo, or cover image. For logo_url and cover_image_url, pass CDN URLs returned by upload_file or upload_asset.", {
+    server.tool('update_kit', "Update a kit's top-level settings like name, accent color, template, tagline, logo, cover image, or white-label meta/favicon (Pro+). For logo_url and cover_image_url, pass CDN URLs returned by upload_file or upload_asset. For og_image_url and custom_favicon_url, pass CDN URLs from upload_file.", {
         kit_id: z.string().describe('Kit UUID'),
         name: z.string().optional().describe('New kit name'),
         accent_color: z.string().optional().describe('New accent color as hex'),
@@ -113,7 +113,26 @@ export function registerKitTools(server, client) {
             .string()
             .optional()
             .describe('CDN URL for the kit cover/hero image (from upload_file or upload_asset). Set to empty string to remove.'),
-    }, async ({ kit_id, name, accent_color, template, tagline, logo_url, cover_image_url }) => {
+        // White-label fields (Pro+ only)
+        og_title: z
+            .string()
+            .nullable()
+            .optional()
+            .describe('(Pro+) Custom page title used in browser tab and social sharing. Pass null to reset to kit name.'),
+        og_description: z
+            .string()
+            .nullable()
+            .optional()
+            .describe('(Pro+) Custom meta description for search results and social sharing. Pass null to reset.'),
+        og_image_url: z
+            .string()
+            .optional()
+            .describe('(Pro+) CDN URL for the custom social share / OG image (from upload_file). Set to empty string to remove.'),
+        custom_favicon_url: z
+            .string()
+            .optional()
+            .describe('(Pro+) CDN URL for a custom browser tab favicon (from upload_file). Accepts ICO, PNG, or SVG. Set to empty string to remove.'),
+    }, async ({ kit_id, name, accent_color, template, tagline, logo_url, cover_image_url, og_title, og_description, og_image_url, custom_favicon_url }) => {
         try {
             const updateData = {};
             if (name)
@@ -128,6 +147,15 @@ export function registerKitTools(server, client) {
                 updateData.logo_url = logo_url || null;
             if (cover_image_url !== undefined)
                 updateData.cover_image_url = cover_image_url || null;
+            // White-label fields
+            if (og_title !== undefined)
+                updateData.og_title = og_title;
+            if (og_description !== undefined)
+                updateData.og_description = og_description;
+            if (og_image_url !== undefined)
+                updateData.og_image_url = og_image_url;
+            if (custom_favicon_url !== undefined)
+                updateData.custom_favicon_url = custom_favicon_url;
             const result = await client.updateKit(kit_id, updateData);
             return {
                 content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
