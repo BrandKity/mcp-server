@@ -1,4 +1,4 @@
-# @brandkity/mcp — BrandKity MCP Server
+# @brandkity/mcp — [BrandKity](https://brandkity.com) MCP Server
 
 Model Context Protocol server for **BrandKity** — create and manage brand kits from any AI agent (Claude Desktop, Cursor, Windsurf, or any MCP-compatible client).
 
