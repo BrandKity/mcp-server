@@ -1,6 +1,6 @@
 {
   "name": "@brandkity/mcp",
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "BrandKity MCP Server — Create and manage brand kits from AI agents",
   "type": "module",
   "bin": {
