@@ -2,7 +2,7 @@
 
 Model Context Protocol server for **BrandKity** — create and manage brand kits from any AI agent (Claude Desktop, Cursor, Windsurf, or any MCP-compatible client).
 
-**Current Version**: 1.4.0 — Now with white-label branding support (Pro+)
+**Current Version**: 1.4.3 — MCP now available on Starter, Pro, and Agency plans
 
 ## Quick Start
 
