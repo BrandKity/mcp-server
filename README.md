@@ -12,7 +12,7 @@ Model Context Protocol server for **BrandKity** — create and manage brand kits
 2. Go to **Settings → API Keys**
 3. Click **Generate New Key** and copy the key (`bk_live_...`)
 
-> Requires a **Pro** or **Agency** plan for tool execution.
+> Available on **Starter**, **Pro**, and **Agency** plans. Sign up free to explore, then upgrade Starter or above to run tool calls.
 
 ### 2. Configure Your AI Client
 
@@ -134,8 +134,8 @@ await client.updateKit('kit-id', {
 - `og_image_url` (string) — CDN URL to social share image (1200×630 px recommended)
 
 **Plan Requirements**:
-- Free/Starter: White-label fields are read-only
-- Pro/Agency: Full read-write access
+- Free: White-label fields are read-only; MCP tool calls return 403
+- Starter/Pro/Agency: Full MCP access; white-label fields are read-write on Pro/Agency
 
 ## Environment Variables
 
